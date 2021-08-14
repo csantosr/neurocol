@@ -1,0 +1,6 @@
+[submodule "neurocol-frontend"]
+	path = neurocol-frontend
+	url = ./neurocol-frontend
+[submodule "neurocol-backend"]
+	path = neurocol-backend
+	url = ./neurocol-backend
