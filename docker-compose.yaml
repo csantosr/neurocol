@@ -1,0 +1,63 @@
+version: "3.2"
+
+services:
+  neurocol-api:
+    image: neurocol-api
+    build: ./neurocol-backend/neurocol-api
+    ports: 
+      - "3002:3002"
+    env_file:
+      - "./neurocol-backend/config/.${ENV}/.api.env"
+    volumes: 
+      - type: bind
+        source: ./neurocol-backend/neurocol-api/src
+        target: /usr/src/neurocol-backend/src
+    depends_on:
+      - neurocol-db
+  neurocol-db:
+    image: neurocol-db
+    build: ./neurocol-backend/neurocol-db
+    env_file:
+      - "./neurocol-backend/config/.${ENV}/.db.env"
+    ports: 
+      - "5432:5432"
+    restart: always
+    volumes: 
+      - type: bind
+        source: ./neurocol-backend/neurocol-db/db_data
+        target: /var/lib/postgresql/data
+  neurocol-chat-db:
+    image : mongo
+    container_name: neurocol-chat-db
+    env_file:
+      - "./neurocol-backend/config/.${ENV}/.chat.db.env"
+    volumes:
+      - type: bind
+        source: ./neurocol-backend/neurocol-chat-db/db_data
+        target: /data/db
+    ports:
+      - "27017:27018"
+    restart: unless-stopped
+  neurocol-chat:
+    image: neurocol-chat
+    build: ./neurocol-backend/neurocol-chat
+    ports: 
+      - "4000:4000"
+    env_file:
+      - "./neurocol-backend/config/.${ENV}/.chat.env"
+    volumes: 
+      - type: bind
+        source: ./neurocol-backend/neurocol-chat/src
+        target: /usr/src/neurocol-chat/src
+    depends_on:
+      - neurocol-api
+      - neurocol-chat-db
+  neurocol-web:
+    image: neurocol-web
+    build: ./neurocol-frontend
+    ports:
+      - "80:80"
+    volumes:
+      - type: "bind"
+        source: ./neurocol-frontend
+        target: /usr/src/neurocol-frontend
